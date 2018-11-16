@@ -1,0 +1,52 @@
+# This file is a template, and might need editing before it works on your project.
+# Official language image. Look for the different tagged releases at:
+# https://hub.docker.com/r/library/ruby/tags/
+image: "ruby:2.5"
+
+# Pick zero or more services to be used on all builds.
+# Only needed when using a docker container to run your tests in.
+# Check out: http://docs.gitlab.com/ce/ci/docker/using_docker_images.html#what-is-a-service
+services:
+  - postgres:11
+
+variables:
+  POSTGRES_DB: rails-tailwindcss-starter_test
+
+# Cache gems in between builds
+cache:
+  paths:
+    - vendor/ruby
+    - node_modules
+
+# This is a basic example for a gem or script which doesn't use
+# services such as redis or postgres
+before_script:
+  # Install node and some other deps
+  - curl -sL https://deb.nodesource.com/setup_11.x | bash -
+  - apt-get update -yq
+  - apt-get install -y apt-transport-https nodejs
+
+  # Install yarn
+  - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+  - echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+  - apt-get update -yq
+  - apt-get install yarn -yqq
+  - yarn install
+
+  # Project setup
+  - gem install bundler --no-ri --no-rdoc    # Bundler is not installed with the image
+  - bundle install -j $(nproc) --path vendor  # Install dependencies into ./vendor/ruby
+
+# Optional - Delete if not using `rubocop`
+rubocop:
+  script:
+  - bundle exec rubocop
+
+rails:
+  variables:
+    DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/$POSTGRES_DB"
+    RAILS_ENV: test
+  script:
+  - bundle exec rails db:migrate
+  - bundle exec rails db:seed
+  - bundle exec rails test
