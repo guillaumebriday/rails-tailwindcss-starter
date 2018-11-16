@@ -1,0 +1,22 @@
+AllCops:
+  Exclude:
+    - 'vendor/**/*'
+    - 'spec/fixtures/**/*'
+    - 'tmp/**/*'
+    - 'bin/**/*'
+    - 'node_modules/**/*'
+
+Rails:
+  Enabled: true
+
+Metrics/LineLength:
+  Enabled: false
+
+Style/EmptyMethod:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/Documentation:
+  Enabled: false
