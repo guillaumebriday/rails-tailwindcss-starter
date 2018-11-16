@@ -1,24 +1,14 @@
-# README
+[![build](https://gitlab.com/guillaumebriday/rails-tailwindcss-starter/badges/master/build.svg)](https://gitlab.com/guillaumebriday/rails-tailwindcss-starter/pipelines)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/guillaumebriday)
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+# Rails Tailwindcss Starter
 
-Things you may want to cover:
 
-* Ruby version
 
-* System dependencies
+## Contributing
 
-* Configuration
+Do not hesitate to contribute to the project by adapting or adding features ! Bug reports or pull requests are welcome.
 
-* Database creation
+## License
 
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+This project is released under the [MIT](http://opensource.org/licenses/MIT) license.
