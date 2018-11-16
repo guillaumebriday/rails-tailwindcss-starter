@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>RailsTailwindcssStarter</title>
+    <title>Rails Tailwindcss Starter</title>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
@@ -9,7 +9,9 @@
     <%= stylesheet_pack_tag 'application' %>
   </head>
 
-  <body>
-    <%= yield %>
+  <body class="flex flex-col min-h-screen font-sans leading-normal">
+    <main class="flex-1">
+      <%= yield %>
+    </main>
   </body>
 </html>
