@@ -3,6 +3,9 @@
 # https://hub.docker.com/r/library/ruby/tags/
 image: "ruby:2.5"
 
+stages:
+  - test
+
 # Pick zero or more services to be used on all builds.
 # Only needed when using a docker container to run your tests in.
 # Check out: http://docs.gitlab.com/ce/ci/docker/using_docker_images.html#what-is-a-service
@@ -39,10 +42,12 @@ before_script:
 
 # Optional - Delete if not using `rubocop`
 rubocop:
+  stage: test
   script:
   - bundle exec rubocop
 
 rails:
+  stage: test
   variables:
     DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/$POSTGRES_DB"
     RAILS_ENV: test
