@@ -84,6 +84,7 @@ test:
 #
 production:
   <<: *default
-  database: rails-tailwindcss-starter_production
-  username: rails-tailwindcss-starter
-  password: <%= ENV['RAILS-TAILWINDCSS-STARTER_DATABASE_PASSWORD'] %>
+  host: <%= ENV['DB_HOST'] %>
+  username: <%= ENV['DB_USERNAME'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
+  database: <%= ENV['DB_DATABASE'] %>

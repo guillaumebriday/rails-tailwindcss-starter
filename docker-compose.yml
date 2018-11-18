@@ -6,4 +6,5 @@ services:
     ports:
       - "5432:5432"
     environment:
+      POSTGRES_DB: rails_tailwindcss_starter_production
       POSTGRES_PASSWORD: secret
