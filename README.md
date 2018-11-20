@@ -7,9 +7,15 @@ The purpose of this repository is to provide you a head start to build your next
 
 ## Introduction
 
-This is a Rails 5.2 application with Webpacker, Tailwind CSS, Rubocop and Docker.
+This is a Rails 5.2 application with [Webpacker](https://github.com/rails/webpacker), [Tailwind CSS](https://tailwindcss.com), [Rubocop](https://github.com/rubocop-hq/rubocop) and [Docker](https://www.docker.com).
 
-## Requirements
+To create the app, I used this command:
+
+```bash
+$ rails new --webpack --skip-action-mailer --skip-action-cable --skip-sprockets --skip-spring  --skip-coffee --skip-turbolinks --skip-javascript --skip-bootsnap --database=postgresql .
+```
+
+## Requirements in development environment
 
 - Rails
 - Ruby 2.5
