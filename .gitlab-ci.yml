@@ -1,19 +1,15 @@
-# This file is a template, and might need editing before it works on your project.
-# Official language image. Look for the different tagged releases at:
-# https://hub.docker.com/r/library/ruby/tags/
 image: "ruby:2.5"
 
 stages:
   - test
-
-# Pick zero or more services to be used on all builds.
-# Only needed when using a docker container to run your tests in.
-# Check out: http://docs.gitlab.com/ce/ci/docker/using_docker_images.html#what-is-a-service
-services:
-  - postgres:11
+  - build
+  - review
+  - deploy
 
 variables:
-  POSTGRES_DB: rails-tailwindcss-starter_test
+  POSTGRES_DB: app_production
+  IMAGE_TAG: registry.gitlab.com/guillaumebriday/rails-tailwindcss-starter:$CI_COMMIT_REF_SLUG
+  REGISTRY_URL: registry.gitlab.com
 
 # Cache gems in between builds
 cache:
@@ -21,37 +17,157 @@ cache:
     - vendor/ruby
     - node_modules
 
-# This is a basic example for a gem or script which doesn't use
-# services such as redis or postgres
-before_script:
-  # Install node and some other deps
-  - curl -sL https://deb.nodesource.com/setup_11.x | bash -
-  - apt-get update -yq
-  - apt-get install -y apt-transport-https nodejs
+.setup_test_env: &setup_test_env
+  services:
+    - postgres:11
 
-  # Install yarn
-  - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-  - echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-  - apt-get update -yq
-  - apt-get install yarn -yqq
-  - yarn install
+  before_script:
+    # Install node and some other deps
+    - curl -sL https://deb.nodesource.com/setup_11.x | bash -
+    - apt-get update -yq
+    - apt-get install -y apt-transport-https nodejs
 
-  # Project setup
-  - gem install bundler --no-ri --no-rdoc    # Bundler is not installed with the image
-  - bundle install -j $(nproc) --path vendor  # Install dependencies into ./vendor/ruby
+    # Install yarn
+    - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+    - echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+    - apt-get update -yq
+    - apt-get install yarn -yqq
+    - yarn install
 
-# Optional - Delete if not using `rubocop`
+    # Project setup
+    - gem install bundler --no-ri --no-rdoc    # Bundler is not installed with the image
+    - bundle install -j $(nproc) --path vendor  # Install dependencies into ./vendor/ruby
+
+# Stage: Test
 rubocop:
+  <<: *setup_test_env
   stage: test
   script:
   - bundle exec rubocop
 
 rails:
+  <<: *setup_test_env
   stage: test
   variables:
+    POSTGRES_DB: rails-tailwindcss-starter_test
     DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/$POSTGRES_DB"
     RAILS_ENV: test
   script:
   - bundle exec rails db:migrate
   - bundle exec rails db:seed
   - bundle exec rails test
+
+# Stage: Build
+build_image:
+  stage: build
+  image: docker:stable
+  services:
+    - docker:dind
+  script:
+    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+    - echo "${RAILS_MASTER_KEY}" > config/master.key
+    - docker build -t ${IMAGE_TAG} .
+    - docker push $IMAGE_TAG
+
+# Stage: review
+.setup_deploy_env: &setup_deploy_env
+  image: kroniak/ssh-client
+  before_script:
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - ssh-keyscan -H 'guillaumebriday.me' >> ~/.ssh/known_hosts
+
+review_app:
+  <<: *setup_deploy_env
+  stage: review
+  script:
+    # log into Docker registry
+    - ssh root@guillaumebriday.me "docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${REGISTRY_URL}"
+    - ssh root@guillaumebriday.me "docker pull ${IMAGE_TAG}"
+
+    # stop containers, remove image.
+    - ssh root@guillaumebriday.me "docker stop app_${CI_COMMIT_REF_SLUG} db_${CI_COMMIT_REF_SLUG}" || true
+    - ssh root@guillaumebriday.me "docker rmi ${IMAGE_TAG}" || true
+
+    # start new containers
+    - ssh root@guillaumebriday.me \
+      "docker run --rm --name db_${CI_COMMIT_REF_SLUG} -e POSTGRES_DB=${POSTGRES_DB} -e POSTGRES_PASSWORD=secret -d postgres:11"
+    - ssh root@guillaumebriday.me \
+      "docker run --rm --name app_${CI_COMMIT_REF_SLUG} --link db_${CI_COMMIT_REF_SLUG} -e DB_HOST=db_${CI_COMMIT_REF_SLUG} -d -l traefik.frontend.rule=Host::${CI_COMMIT_REF_SLUG}.guillaumebriday.me ${IMAGE_TAG}"
+  only:
+    - branches
+  except:
+    - master
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    url: https://$CI_COMMIT_REF_SLUG.guillaumebriday.me/
+    on_stop: stop_review_app
+
+stop_review_app:
+  <<: *setup_deploy_env
+  stage: review
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - ssh root@guillaumebriday.me "docker stop app_${CI_COMMIT_REF_SLUG} db_${CI_COMMIT_REF_SLUG}" || true
+    - ssh root@guillaumebriday.me "docker rmi ${IMAGE_TAG}" || true
+  when: manual
+  only:
+    - branches
+  except:
+    - master
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    action: stop
+
+# Stage: deploy
+deploy_staging:
+  <<: *setup_deploy_env
+  stage: deploy
+  script:
+    # log into Docker registry
+    - ssh root@guillaumebriday.me "docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${REGISTRY_URL}"
+    - ssh root@guillaumebriday.me "docker pull ${IMAGE_TAG}"
+
+    # stop containers, remove image.
+    - ssh root@guillaumebriday.me "docker stop app_staging db_staging" || true
+    - ssh root@guillaumebriday.me "docker rmi ${IMAGE_TAG}" || true
+
+    # start new containers
+    - ssh root@guillaumebriday.me \
+      "docker run --rm --name db_staging -e POSTGRES_DB=${POSTGRES_DB} -e POSTGRES_PASSWORD=secret -d postgres:11"
+    - ssh root@guillaumebriday.me \
+      "docker run --rm --name app_staging --link db_staging -e DB_HOST=db_staging -d -l traefik.frontend.rule=Host::staging.guillaumebriday.me ${IMAGE_TAG}"
+  only:
+    - master
+  when: manual
+  environment:
+    name: staging
+    url: https://staging.guillaumebriday.me/
+
+
+deploy_prod:
+  <<: *setup_deploy_env
+  stage: deploy
+  script:
+    # log into Docker registry
+    - ssh root@guillaumebriday.me "docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${REGISTRY_URL}"
+    - ssh root@guillaumebriday.me "docker pull ${IMAGE_TAG}"
+
+    # stop containers, remove image.
+    - ssh root@guillaumebriday.me "docker stop app_production db_production" || true
+    - ssh root@guillaumebriday.me "docker rmi ${IMAGE_TAG}" || true
+
+    # start new containers
+    - ssh root@guillaumebriday.me \
+      "docker run --rm --name db_production -e POSTGRES_DB=${POSTGRES_DB} -e POSTGRES_PASSWORD=secret -d postgres:11"
+    - ssh root@guillaumebriday.me \
+      "docker run --rm --name app_production --link db_production -e DB_HOST=db_production -d -l traefik.frontend.rule=Host::guillaumebriday.me ${IMAGE_TAG}"
+  only:
+    - master
+  when: manual
+  environment:
+    name: production
+    url: https://guillaumebriday.me/
