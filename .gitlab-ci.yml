@@ -66,7 +66,7 @@ build_image:
   script:
     - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
     - echo "${RAILS_MASTER_KEY}" > config/master.key
-    - docker build -t ${IMAGE_TAG} .
+    - docker build -f .cloud/docker/Dockerfile -t ${IMAGE_TAG} .
     - docker push $IMAGE_TAG
 
 # Stage: review
