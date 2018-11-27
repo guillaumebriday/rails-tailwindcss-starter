@@ -1,4 +1,4 @@
-FROM ruby:2.5
+FROM ruby:2.5-slim
 
 LABEL maintainer="guillaumebriday@gmail.com"
 LABEL traefik.enable="true"
@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     apt-transport-https \
     postgresql-client \
+    libpq-dev \
     curl \
     bash \
     nodejs
