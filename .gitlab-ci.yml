@@ -89,7 +89,6 @@ review_app:
 
     # stop containers, remove image.
     - ssh root@guillaumebriday.me "docker stop app_${CI_COMMIT_REF_SLUG} db_${CI_COMMIT_REF_SLUG}" || true
-    - ssh root@guillaumebriday.me "docker rmi ${IMAGE_TAG}" || true
 
     # start new containers
     - ssh root@guillaumebriday.me \
@@ -133,7 +132,6 @@ deploy_staging:
 
     # stop containers, remove image.
     - ssh root@guillaumebriday.me "docker stop app_staging db_staging" || true
-    - ssh root@guillaumebriday.me "docker rmi ${IMAGE_TAG}" || true
 
     # start new containers
     - ssh root@guillaumebriday.me \
@@ -158,7 +156,6 @@ deploy_prod:
 
     # stop containers, remove image.
     - ssh root@guillaumebriday.me "docker stop app_production db_production" || true
-    - ssh root@guillaumebriday.me "docker rmi ${IMAGE_TAG}" || true
 
     # start new containers
     - ssh root@guillaumebriday.me \
