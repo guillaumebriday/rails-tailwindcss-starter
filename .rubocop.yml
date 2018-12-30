@@ -5,6 +5,7 @@ AllCops:
     - 'tmp/**/*'
     - 'bin/**/*'
     - 'node_modules/**/*'
+    - db/schema.rb
 
 Rails:
   Enabled: true
