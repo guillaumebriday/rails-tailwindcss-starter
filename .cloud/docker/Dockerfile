@@ -43,7 +43,7 @@ COPY . .
 COPY .cloud/docker/docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-RUN gem install bundler
+RUN gem install bundler --no-document
 RUN bundle install --jobs 20 --without development test
 RUN bundle exec rake assets:precompile
 
