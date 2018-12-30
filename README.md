@@ -32,13 +32,13 @@ $ yarn install
 $ ./bin/webpack
 $ docker-compose up -d
 $ bundle exec rails db:setup
-$ bundle exec rails s
+$ bundle exec rails s # or RUBYOPT="--jit" bundle exec rails s
 ```
 
 Useful commands :
 ```bash
-$ bundle exec rails test
-$ rubocop
+$ bundle exec rails test # or RUBYOPT="--jit" bundle exec rails test
+$ bundle exec rubocop # or RUBYOPT="--jit" bundle exec rubocop
 ```
 
 Now you can access the application on http://localhost:3000.
