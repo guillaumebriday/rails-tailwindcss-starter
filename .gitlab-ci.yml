@@ -77,31 +77,31 @@ build_image:
   - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
   - mkdir -p ~/.ssh
   - chmod 700 ~/.ssh
-  - ssh-keyscan -H 'guillaumebriday.me' >> ~/.ssh/known_hosts
+  - ssh-keyscan -H 'guillaumebriday.xyz' >> ~/.ssh/known_hosts
 
 review_app:
   <<: *setup_deploy_env
   stage: review
   script:
     # log into Docker registry
-    - ssh root@guillaumebriday.me "docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${REGISTRY_URL}"
-    - ssh root@guillaumebriday.me "docker pull ${IMAGE_TAG}"
+    - ssh root@guillaumebriday.xyz "docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${REGISTRY_URL}"
+    - ssh root@guillaumebriday.xyz "docker pull ${IMAGE_TAG}"
 
     # stop containers, remove image.
-    - ssh root@guillaumebriday.me "docker stop app_${CI_COMMIT_REF_SLUG} db_${CI_COMMIT_REF_SLUG}" || true
+    - ssh root@guillaumebriday.xyz "docker stop app_${CI_COMMIT_REF_SLUG} db_${CI_COMMIT_REF_SLUG}" || true
 
     # start new containers
-    - ssh root@guillaumebriday.me \
+    - ssh root@guillaumebriday.xyz \
       "docker run --rm --name db_${CI_COMMIT_REF_SLUG} -e POSTGRES_DB=${POSTGRES_DB} -e POSTGRES_PASSWORD=secret -d postgres:11"
-    - ssh root@guillaumebriday.me \
-      "docker run --rm --name app_${CI_COMMIT_REF_SLUG} --link db_${CI_COMMIT_REF_SLUG} -e DB_HOST=db_${CI_COMMIT_REF_SLUG} -d -l traefik.frontend.rule=Host::${CI_COMMIT_REF_SLUG}.guillaumebriday.me ${IMAGE_TAG}"
+    - ssh root@guillaumebriday.xyz \
+      "docker run --rm --name app_${CI_COMMIT_REF_SLUG} --link db_${CI_COMMIT_REF_SLUG} -e DB_HOST=db_${CI_COMMIT_REF_SLUG} -d -l traefik.frontend.rule=Host:${CI_COMMIT_REF_SLUG}.guillaumebriday.xyz ${IMAGE_TAG}"
   only:
     - branches
   except:
     - master
   environment:
     name: review/$CI_COMMIT_REF_SLUG
-    url: https://$CI_COMMIT_REF_SLUG.guillaumebriday.me/
+    url: https://$CI_COMMIT_REF_SLUG.guillaumebriday.xyz/
     on_stop: stop_review_app
 
 stop_review_app:
@@ -110,8 +110,8 @@ stop_review_app:
   variables:
     GIT_STRATEGY: none
   script:
-    - ssh root@guillaumebriday.me "docker stop app_${CI_COMMIT_REF_SLUG} db_${CI_COMMIT_REF_SLUG}" || true
-    - ssh root@guillaumebriday.me "docker rmi ${IMAGE_TAG}" || true
+    - ssh root@guillaumebriday.xyz "docker stop app_${CI_COMMIT_REF_SLUG} db_${CI_COMMIT_REF_SLUG}" || true
+    - ssh root@guillaumebriday.xyz "docker rmi ${IMAGE_TAG}" || true
   when: manual
   only:
     - branches
@@ -127,23 +127,23 @@ deploy_staging:
   stage: deploy
   script:
     # log into Docker registry
-    - ssh root@guillaumebriday.me "docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${REGISTRY_URL}"
-    - ssh root@guillaumebriday.me "docker pull ${IMAGE_TAG}"
+    - ssh root@guillaumebriday.xyz "docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${REGISTRY_URL}"
+    - ssh root@guillaumebriday.xyz "docker pull ${IMAGE_TAG}"
 
     # stop containers, remove image.
-    - ssh root@guillaumebriday.me "docker stop app_staging db_staging" || true
+    - ssh root@guillaumebriday.xyz "docker stop app_staging db_staging" || true
 
     # start new containers
-    - ssh root@guillaumebriday.me \
+    - ssh root@guillaumebriday.xyz \
       "docker run --rm --name db_staging -e POSTGRES_DB=${POSTGRES_DB} -e POSTGRES_PASSWORD=secret -d postgres:11"
-    - ssh root@guillaumebriday.me \
-      "docker run --rm --name app_staging --link db_staging -e DB_HOST=db_staging -d -l traefik.frontend.rule=Host::staging.guillaumebriday.me ${IMAGE_TAG}"
+    - ssh root@guillaumebriday.xyz \
+      "docker run --rm --name app_staging --link db_staging -e DB_HOST=db_staging -d -l traefik.frontend.rule=Host:staging.guillaumebriday.xyz ${IMAGE_TAG}"
   only:
     - master
   when: manual
   environment:
     name: staging
-    url: https://staging.guillaumebriday.me/
+    url: https://staging.guillaumebriday.xyz/
 
 
 deploy_prod:
@@ -151,20 +151,20 @@ deploy_prod:
   stage: deploy
   script:
     # log into Docker registry
-    - ssh root@guillaumebriday.me "docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${REGISTRY_URL}"
-    - ssh root@guillaumebriday.me "docker pull ${IMAGE_TAG}"
+    - ssh root@guillaumebriday.xyz "docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${REGISTRY_URL}"
+    - ssh root@guillaumebriday.xyz "docker pull ${IMAGE_TAG}"
 
     # stop containers, remove image.
-    - ssh root@guillaumebriday.me "docker stop app_production db_production" || true
+    - ssh root@guillaumebriday.xyz "docker stop app_production db_production" || true
 
     # start new containers
-    - ssh root@guillaumebriday.me \
+    - ssh root@guillaumebriday.xyz \
       "docker run --rm --name db_production -e POSTGRES_DB=${POSTGRES_DB} -e POSTGRES_PASSWORD=secret -d postgres:11"
-    - ssh root@guillaumebriday.me \
-      "docker run --rm --name app_production --link db_production -e DB_HOST=db_production -d -l traefik.frontend.rule=Host::guillaumebriday.me ${IMAGE_TAG}"
+    - ssh root@guillaumebriday.xyz \
+      "docker run --rm --name app_production --link db_production -e DB_HOST=db_production -d -l traefik.frontend.rule=Host:rails-tailwindcss-starter.guillaumebriday.xyz ${IMAGE_TAG}"
   only:
     - master
   when: manual
   environment:
     name: production
-    url: https://guillaumebriday.me/
+    url: https://rails-tailwindcss-starter.guillaumebriday.xyz/
