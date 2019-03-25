@@ -17,9 +17,22 @@ cache:
     - vendor/ruby
     - node_modules
 
-.setup_test_env: &setup_test_env
+# Stage: Test
+rubocop:
+  stage: test
+  script:
+  - gem install rubocop --no-document
+  - rubocop
+
+tests:
+  stage: test
+  variables:
+    POSTGRES_DB: rails-tailwindcss-starter_test
+    DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/$POSTGRES_DB"
+    RAILS_ENV: test
+
   services:
-    - postgres:11
+    - postgres:11-alpine
 
   before_script:
     # Install node and some other deps
@@ -35,27 +48,13 @@ cache:
     - yarn install
 
     # Project setup
-    - gem install bundler --no-document    # Bundler is not installed with the image
-    - bundle install -j $(nproc) --path vendor  # Install dependencies into ./vendor/ruby
+    - gem install bundler --no-document
+    - bundle install -j $(nproc) --path vendor --quiet  # Install dependencies into ./vendor/ruby
 
-# Stage: Test
-rubocop:
-  <<: *setup_test_env
-  stage: test
   script:
-  - bundle exec rubocop
-
-rails:
-  <<: *setup_test_env
-  stage: test
-  variables:
-    POSTGRES_DB: rails-tailwindcss-starter_test
-    DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/$POSTGRES_DB"
-    RAILS_ENV: test
-  script:
-  - bundle exec rails db:migrate
-  - bundle exec rails db:seed
-  - bundle exec rails test
+    - bundle exec rails db:migrate
+    - bundle exec rails db:seed
+    - bundle exec rails test
 
 # Stage: Build
 build_image:
@@ -73,11 +72,11 @@ build_image:
 .setup_deploy_env: &setup_deploy_env
   image: kroniak/ssh-client
   before_script:
-  - eval $(ssh-agent -s)
-  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
-  - mkdir -p ~/.ssh
-  - chmod 700 ~/.ssh
-  - ssh-keyscan -H 'guillaumebriday.xyz' >> ~/.ssh/known_hosts
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H 'guillaumebriday.xyz' >> ~/.ssh/known_hosts
 
 review_app:
   <<: *setup_deploy_env
