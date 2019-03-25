@@ -18,7 +18,10 @@ ENV DB_HOST="db" \
     DB_DATABASE="app_production"
 
 # Installing dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && \
+    mkdir -p /usr/share/man/man1 && \
+    mkdir -p /usr/share/man/man7 && \
+    apt-get install -yf \
     build-essential \
     apt-transport-https \
     postgresql-client \
