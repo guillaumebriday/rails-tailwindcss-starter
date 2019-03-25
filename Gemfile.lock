@@ -74,9 +74,6 @@ GEM
       concurrent-ruby (~> 1.0)
     io-like (0.3.0)
     jaro_winkler (1.5.1)
-    jbuilder (2.8.0)
-      activesupport (>= 4.2.0)
-      multi_json (>= 1.2)
     listen (3.1.5)
       rb-fsevent (~> 0.9, >= 0.9.4)
       rb-inotify (~> 0.9, >= 0.9.7)
@@ -93,7 +90,6 @@ GEM
     mini_mime (1.0.1)
     mini_portile2 (2.4.0)
     minitest (5.11.3)
-    multi_json (1.13.1)
     nio4r (2.3.1)
     nokogiri (1.9.1)
       mini_portile2 (~> 2.4.0)
@@ -187,7 +183,6 @@ DEPENDENCIES
   byebug
   capybara (>= 2.15)
   chromedriver-helper
-  jbuilder (~> 2.5)
   listen (>= 3.0.5, < 3.2)
   pg (>= 0.18, < 2.0)
   puma (~> 3.11)
@@ -199,7 +194,7 @@ DEPENDENCIES
   webpacker
 
 RUBY VERSION
-   ruby 2.6.0p0
+   ruby 2.6.2p47
 
 BUNDLED WITH
    1.17.2
