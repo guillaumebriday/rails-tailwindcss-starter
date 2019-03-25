@@ -18,7 +18,7 @@ $ rails new --webpack --skip-action-mailer --skip-action-cable --skip-sprockets 
 ## Requirements in development environment
 
 - Rails
-- Ruby 2.6
+- Ruby 2.6.2
 - Node.js and Yarn
 - Docker and Docker-Compose
 
