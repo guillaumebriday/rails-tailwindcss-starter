@@ -2,10 +2,13 @@
   "name": "rails-tailwindcss-starter",
   "private": true,
   "dependencies": {
-    "@rails/webpacker": "3.5",
-    "tailwindcss": "^0.7.2"
+    "@rails/webpacker": "4.0.2",
+    "glob-all": "^3.1.0",
+    "path": "^0.12.7",
+    "purgecss-webpack-plugin": "^1.4.0",
+    "tailwindcss": "^0.7.4"
   },
   "devDependencies": {
-    "webpack-dev-server": "2.11.2"
+    "webpack-dev-server": "3.2.1"
   }
 }
