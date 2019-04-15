@@ -1,4 +1,4 @@
-image: ruby:2.6.2
+image: guillaumebriday/ruby-node:2.6.2
 
 stages:
   - test
@@ -35,19 +35,6 @@ tests:
     - postgres:11-alpine
 
   before_script:
-    # Install node and some other deps
-    - curl -sL https://deb.nodesource.com/setup_11.x | bash -
-    - apt-get update -yq
-    - apt-get install -y apt-transport-https nodejs
-
-    # Install yarn
-    - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-    - echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-    - apt-get update -yq
-    - apt-get install yarn -yqq
-    - yarn install
-
-    # Project setup
     - gem install bundler --no-document
     - bundle install -j $(nproc) --path vendor --quiet  # Install dependencies into ./vendor/ruby
 
