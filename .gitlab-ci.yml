@@ -1,4 +1,4 @@
-image: guillaumebriday/ruby-node:2.6.2
+image: guillaumebriday/ruby-node:2.6.3
 
 stages:
   - test

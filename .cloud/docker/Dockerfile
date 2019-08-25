@@ -1,4 +1,4 @@
-FROM ruby:2.6.2-slim
+FROM ruby:2.6.3-slim
 
 LABEL maintainer="guillaumebriday@gmail.com"
 LABEL traefik.enable="true"
