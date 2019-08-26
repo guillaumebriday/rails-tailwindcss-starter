@@ -7,7 +7,7 @@ The purpose of this repository is to provide you a head start to build your next
 
 ## Introduction
 
-This is a Rails 5.2 application with [Webpacker](https://github.com/rails/webpacker), [Tailwind CSS](https://tailwindcss.com), [Rubocop](https://github.com/rubocop-hq/rubocop) and [Docker](https://www.docker.com).
+This is a Rails 6.0 application with [Webpacker](https://github.com/rails/webpacker), [Tailwind CSS](https://tailwindcss.com), [Rubocop](https://github.com/rubocop-hq/rubocop) and [Docker](https://www.docker.com).
 
 To create the app, I used this command:
 
