@@ -8,8 +8,7 @@ stages:
 
 variables:
   POSTGRES_DB: app_production
-  IMAGE_TAG: registry.gitlab.com/guillaumebriday/rails-tailwindcss-starter:$CI_COMMIT_REF_SLUG
-  REGISTRY_URL: registry.gitlab.com
+  IMAGE_TAG: guillaumebriday/rails-tailwindcss-starter:$CI_COMMIT_REF_SLUG
 
 # Cache gems in between builds
 cache:
@@ -51,7 +50,7 @@ build_image:
   services:
     - docker:dind
   script:
-    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
     - echo "${RAILS_MASTER_KEY}" > config/master.key
     - docker build -f .cloud/docker/Dockerfile -t ${IMAGE_TAG} .
     - docker push $IMAGE_TAG
@@ -71,7 +70,7 @@ review_app:
   stage: review
   script:
     # log into Docker registry
-    - ssh root@guillaumebriday.xyz "docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${REGISTRY_URL}"
+    - ssh root@guillaumebriday.xyz "docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}"
     - ssh root@guillaumebriday.xyz "docker pull ${IMAGE_TAG}"
 
     # stop containers, remove image.
@@ -114,7 +113,7 @@ deploy_staging:
   stage: deploy
   script:
     # log into Docker registry
-    - ssh root@guillaumebriday.xyz "docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${REGISTRY_URL}"
+    - ssh root@guillaumebriday.xyz "docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}"
     - ssh root@guillaumebriday.xyz "docker pull ${IMAGE_TAG}"
 
     # stop containers, remove image.
@@ -138,7 +137,7 @@ deploy_prod:
   stage: deploy
   script:
     # log into Docker registry
-    - ssh root@guillaumebriday.xyz "docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${REGISTRY_URL}"
+    - ssh root@guillaumebriday.xyz "docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}"
     - ssh root@guillaumebriday.xyz "docker pull ${IMAGE_TAG}"
 
     # stop containers, remove image.
