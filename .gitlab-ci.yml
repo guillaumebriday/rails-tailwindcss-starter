@@ -21,8 +21,8 @@ cache:
 rubocop:
   stage: test
   script:
-  - gem install rubocop --no-document
-  - rubocop
+  - bundle install -j $(nproc) --path vendor --quiet  # Install dependencies into ./vendor/ruby
+  - bundle exec rubocop
 
 tests:
   stage: test
@@ -41,6 +41,7 @@ tests:
   script:
     - bundle exec rails db:migrate
     - bundle exec rails db:seed
+    - bundle exec rake assets:precompile
     - bundle exec rails test
 
 # Stage: Build
