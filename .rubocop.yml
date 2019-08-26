@@ -20,8 +20,5 @@ Metrics/LineLength:
 Style/EmptyMethod:
   Enabled: false
 
-Style/StringLiterals:
-  EnforcedStyle: double_quotes
-
 Style/Documentation:
   Enabled: false
