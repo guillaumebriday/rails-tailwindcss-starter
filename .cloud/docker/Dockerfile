@@ -5,7 +5,7 @@ LABEL traefik.enable="true"
 LABEL traefik.port="3000"
 
 # Set our working directory.
-WORKDIR /app
+WORKDIR /var/www
 
 # Setting env up
 ENV RAILS_ENV="production" \
@@ -38,7 +38,7 @@ COPY .cloud/docker/docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 RUN gem install bundler --no-document
-RUN bundle install --jobs 20 --without development test
+RUN bundle install -j $(nproc) --without development test
 RUN bundle exec rake assets:precompile
 
 # Expose HTTP port
